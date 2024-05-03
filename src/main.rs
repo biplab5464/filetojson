@@ -1,6 +1,8 @@
 use clap::Parser;
-use std::fs;
+use std::fs::{read_to_string, File};
+use std::io::Write;
 use std::path::Path;
+use json::{stringify, stringify_pretty, JsonValue};
 
 #[derive(Parser, Debug)]
 #[command(
@@ -16,7 +18,7 @@ struct Command{
     ///print in formated form in json, if not provided it print in compact from
     #[arg(long)]
     pretty: bool,
-    ///Output directory fir the file
+    ///Output directory for the file
     #[arg(long, short)]
     output: Option<String>,
 }
@@ -25,16 +27,44 @@ struct Command{
 fn main() {
     let args = Command::parse();
 
-    println!("got it = {:?}",args);
+    //println!("got it = {:?}",args);
 
     let path = Path::new(&args.dir);
     
-    if !path.exists(){
-        panic!("Please make sure the Directory exist");
+    if !path.exists() || path.is_file(){
+        panic!("Please make sure the Directory exist and it is directory");
     }
 
-    for entry in fs::read_dir(path).unwrap() {
-        println!("{}",entry.unwrap().path().display());
+    let mut json_array = JsonValue::new_array();
+
+    for entry in path.read_dir().expect("seems like a permission issue"){
+        match entry {
+            Err(err) => panic!("Prolbem with reading the file {}",err),
+            Ok(file_path) =>{
+                let file = read_to_string(file_path.path()).expect("Seems like a permission issue");
+                let json: JsonValue =
+                json::parse(&file).expect("Unable to read json,\n Please check th json file");
+                if !args.quite{
+                    println!("added {:?}",file_path.path());
+                }
+                json_array.push(json).expect("the current file is not a json file");
+            }
+        }
     }
+
+    let obj_string = match args.pretty {
+        false => stringify(json_array),
+        true => stringify_pretty(json_array, 2),
+    };
+
+    let name = match args.output {
+        None => "template.json".to_string(),
+        Some(tmp_path) => tmp_path,
+    };
+    
+    let mut write_file = File::create(name).expect("problem with opening the file maybe present before");
+    write_file
+            .write_all(obj_string.as_bytes())
+            .expect("Probem with writeing the file");
 
 }
