@@ -15,9 +15,9 @@ struct Command{
     ///no print to the stdout
     #[arg(long)]
     quite: bool,
-    ///print in formated form in json, if not provided it print in compact from
+    ///print in compacted form in json, if not provided it print in pretty from
     #[arg(long)]
-    pretty: bool,
+    compact: bool,
     ///Output directory for the file
     #[arg(long, short)]
     output: Option<String>,
@@ -52,9 +52,9 @@ fn main() {
         }
     }
 
-    let obj_string = match args.pretty {
-        false => stringify(json_array),
-        true => stringify_pretty(json_array, 2),
+    let obj_string = match args.compact {
+        true => stringify(json_array),
+        false => stringify_pretty(json_array, 2),
     };
 
     let name = match args.output {
