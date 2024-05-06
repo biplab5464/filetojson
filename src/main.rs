@@ -18,6 +18,9 @@ struct Command{
     ///print in compacted form in json, if not provided it print in pretty from
     #[arg(long)]
     compact: bool,
+    ///number of spaces for json in pretty form (only works in pretty form)
+    #[arg(long="space",short='s')]
+    json_space : Option<u16>,
     ///Output directory for the file
     #[arg(long, short)]
     output: Option<String>,
@@ -52,9 +55,14 @@ fn main() {
         }
     }
 
+    let spaces = match args.json_space {
+        None => 2,
+        Some(tmp ) => tmp
+    };
+
     let obj_string = match args.compact {
         true => stringify(json_array),
-        false => stringify_pretty(json_array, 2),
+        false => stringify_pretty(json_array, spaces),
     };
 
     let name = match args.output {
