@@ -12,18 +12,18 @@ use json::{stringify, stringify_pretty, JsonValue};
 struct Command{
     ///Directory where json is present
     dir : String,
-    ///no print to the stdout
-    #[arg(long)]
-    quite: bool,
-    ///print in compacted form in json, if not provided it print in pretty from
-    #[arg(long)]
-    compact: bool,
-    ///number of spaces for json in pretty form (only works in pretty form)
-    #[arg(long="space",short='s')]
-    json_space : Option<u16>,
     ///Output directory for the file
     #[arg(long, short)]
     output: Option<String>,
+    ///print in compacted form in json, if not provided it print in pretty from
+    #[arg(long)]
+    compact: bool,
+    ///no print to the stdout
+    #[arg(long)]
+    quite: bool,
+    ///number of spaces for json in pretty form (only works in pretty form)
+    #[arg(long="space",short='s')]
+    json_space : Option<u16>,
 }
 
 
