@@ -24,6 +24,9 @@ struct Command{
     ///number of spaces for json in pretty form (only works in pretty form)
     #[arg(long="space",short='s')]
     json_space : Option<u16>,
+    //remove _id from JSON
+    #[arg(long = "rmdashid")]
+    remove_id : bool
 }
 
 
@@ -45,11 +48,17 @@ fn main() {
             Err(err) => panic!("Prolbem with reading the file {}",err),
             Ok(file_path) =>{
                 let file = read_to_string(file_path.path()).expect("Seems like a permission issue");
-                let json: JsonValue =
+                let mut json: JsonValue =
                 json::parse(&file).expect("Unable to read json,\n Please check th json file");
+
                 if !args.quite{
                     println!("added {:?}",file_path.path());
                 }
+
+                if args.remove_id {
+                    json.remove("_id");
+                }
+                
                 json_array.push(json).expect("the current file is not a json file");
             }
         }
